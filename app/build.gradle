@@ -1,14 +1,12 @@
-plugins {
-    id 'com.android.application'
-}
+apply plugin: 'com.android.application'
+
 android {
-    namespace 'com.ff.panelpro'
-    compileSdk 33
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.ff.panelpro"
-        minSdk 21
-        targetSdk 33
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
-}￼Enter
+}
