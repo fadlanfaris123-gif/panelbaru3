@@ -55,7 +55,6 @@ public class OverlayService extends Service {
         panelParams.x = 50; panelParams.y = 50;
         windowManager.addView(panelView, panelParams);
 
-        // Panggil listener terpisah
         ((Switch) panelView.findViewById(2131230720)).setOnCheckedChangeListener(new AimbotListener(this));
         ((Switch) panelView.findViewById(2131230721)).setOnCheckedChangeListener(new EspListener(this));
         ((Button) panelView.findViewById(2131230722)).setOnClickListener(new LaunchListener(this));
@@ -80,47 +79,59 @@ public class OverlayService extends Service {
         int centerX = screenW / 2;
         int centerY = screenH / 2;
         List<Rect> boxes = new ArrayList<>();
+        
         int scanRadius = 400;
         int step = 4; 
+        
         for (int y = centerY - scanRadius; y < centerY + scanRadius; y += step) {
             for (int x = centerX - scanRadius; x < centerX + scanRadius; x += step) {
                 if (x < 0 || y < 0 || x >= screenW || y >= screenH) continue;
+                
                 int pixel = bmp.getPixel(x, y);
                 int r = (pixel >> 16) & 0xFF;
                 int g = (pixel >> 8) & 0xFF;
                 int b = pixel & 0xFF;
+                
                 boolean isRed = (r > 150 && g < 100 && b < 100);
-                boolean isSkin = (r > 180 && g > 120 && g < 180 && b > 80 && b < 140);
-                if (isRed || isSkin) {
-                    Rect box = new Rect(x - 20, y - 40, x + 20, y + 40);
+                
+                if (isRed) {
+                    Rect box = new Rect(x - 20, y - 40, x + 20, y + 20);
                     boxes.add(box);
                 }
             }
         }
+
         if (espEnabled) {
             espView.updateBoxes(boxes);
         }
+
         if (aimbotEnabled && !boxes.isEmpty()) {
             Rect closestTarget = null;
             double minDistance = Double.MAX_VALUE;
+
             for (Rect box : boxes) {
                 float headX = box.centerX();
-                float headY = box.top + (box.height() * 0.15f);
+                float headY = box.top; 
+                
                 double dist = Math.sqrt(Math.pow(headX - centerX, 2) + Math.pow(headY - centerY, 2));
+
                 if (dist < 400 && dist < minDistance) {
                     minDistance = dist;
                     closestTarget = box;
                 }
             }
+
             if (closestTarget != null) {
                 float snapX = closestTarget.centerX();
-                float snapY = closestTarget.top + (closestTarget.height() * 0.15f);
+                float snapY = closestTarget.top; 
+                
                 if (AimService.getInstance() != null) {
                     AimService.getInstance().snapShoot(snapX, snapY, centerX, centerY);
                     try { Thread.sleep(150); } catch (InterruptedException e) {}
                 }
             }
         }
+
         bmp.recycle();
     }
 
